@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="action-row" style="margin-bottom: 1.5rem;">
+  <a href="/dashboard/export.csv"><button type="button" class="btn-neutral">Full CSV export</button></a>
+</div>
+
+<h2>Applications</h2>
+<p>{{ applications.this_week }} this week / {{ applications.cap }} cap &nbsp;|&nbsp; {{ applications.all_time }} all-time</p>
+
+<h2>Funnel</h2>
+{% set max_count = funnel[0].count if funnel else 1 %}
+<div>
+  {% for f in funnel %}
+  <div style="display:flex; align-items:center; gap:0.6rem; margin:0.3rem 0;">
+    <div style="width:110px; font-size:0.85rem;">{{ f.stage }}</div>
+    <div style="flex:1; background:rgba(127,127,127,0.15); border-radius:4px; overflow:hidden;">
+      <div style="width:{{ (f.count / max_count * 100) if max_count else 0 }}%; background:#6366f1; height:1.1rem;"></div>
+    </div>
+    <div style="width:40px; text-align:right;">{{ f.count }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2>Token spend</h2>
+{% if tokens.marginal_per_job > 8000 or tokens.per_application > 8000 %}
+<div class="queue-item" style="border-color:#dc2626;">
+  <p><strong>Over budget — investigate before scaling up.</strong>
+  Spec target is under 4k tokens per completed application; above 8k means caching or trimming is broken.</p>
+  <p>Marginal per-job cost (Rewriter + Truth Validator only): <strong>{{ tokens.marginal_per_job | int }}</strong> tokens.
+  All-time total ÷ completed applications: <strong>{{ tokens.per_application | int }}</strong> tokens
+  (inflated by one-time Diagnoser/Recruiter costs and testing iteration).</p>
+  <p><strong>{{ tokens.total_cached }}</strong> tokens ever served from cache, out of {{ tokens.total_all_time }} total —
+  {% if tokens.total_cached == 0 %}prompt caching has never engaged.{% else %}caching is only partially engaged.{% endif %}</p>
+</div>
+{% endif %}
+<p>
+  Completed applications: {{ tokens.completed_applications }} |
+  All-time tokens: {{ tokens.total_all_time }} |
+  Cached: {{ tokens.total_cached }} |
+  Per application (all-time ÷ completed): {{ tokens.per_application | int }} |
+  Marginal per job (Rewriter + Validator only): {{ tokens.marginal_per_job | int }}
+</p>
+
+<h3>By stage</h3>
+<table style="width:100%; border-collapse: collapse;">
+  <tr style="text-align:left; border-bottom: 1px solid rgba(127,127,127,0.3);">
+    <th>Stage</th><th>Calls</th><th>Input</th><th>Output</th><th>Cached</th>
+  </tr>
+  {% for s in tokens.by_stage %}
+  <tr style="border-bottom: 1px solid rgba(127,127,127,0.15);">
+    <td>{{ s.stage }}</td><td>{{ s.calls }}</td><td>{{ s.input_tokens }}</td><td>{{ s.output_tokens }}</td><td>{{ s.cached_tokens }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h3>7-day trend</h3>
+{% set max_day = (tokens.seven_day_trend | map(attribute='tokens') | max) or 1 %}
+<div>
+  {% for d in tokens.seven_day_trend %}
+  <div style="display:flex; align-items:center; gap:0.6rem; margin:0.2rem 0;">
+    <div style="width:90px; font-size:0.85rem;">{{ d.date }}</div>
+    <div style="flex:1; background:rgba(127,127,127,0.15); border-radius:4px; overflow:hidden;">
+      <div style="width:{{ (d.tokens / max_day * 100) if max_day else 0 }}%; background:#16a34a; height:1rem;"></div>
+    </div>
+    <div style="width:60px; text-align:right;">{{ d.tokens }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2>Response rate</h2>
+<h3>By source</h3>
+<table style="width:100%; border-collapse: collapse;">
+  <tr style="text-align:left; border-bottom: 1px solid rgba(127,127,127,0.3);"><th>Source</th><th>Submitted</th><th>Responded</th><th>Rate</th></tr>
+  {% for r in response_by_source %}
+  <tr style="border-bottom: 1px solid rgba(127,127,127,0.15);"><td>{{ r.group }}</td><td>{{ r.submitted }}</td><td>{{ r.responded }}</td><td>{{ r.rate }}%</td></tr>
+  {% else %}<tr><td colspan="4"><em>No submitted applications yet.</em></td></tr>{% endfor %}
+</table>
+
+<h3>By role family</h3>
+<table style="width:100%; border-collapse: collapse;">
+  <tr style="text-align:left; border-bottom: 1px solid rgba(127,127,127,0.3);"><th>Role family</th><th>Submitted</th><th>Responded</th><th>Rate</th></tr>
+  {% for r in response_by_role_family %}
+  <tr style="border-bottom: 1px solid rgba(127,127,127,0.15);"><td>{{ r.group }}</td><td>{{ r.submitted }}</td><td>{{ r.responded }}</td><td>{{ r.rate }}%</td></tr>
+  {% else %}<tr><td colspan="4"><em>No submitted applications yet.</em></td></tr>{% endfor %}
+</table>
+
+<h3>By whether outreach was sent</h3>
+<p class="meta">Tells you if the hiring-manager email is actually worth the effort.</p>
+<table style="width:100%; border-collapse: collapse;">
+  <tr style="text-align:left; border-bottom: 1px solid rgba(127,127,127,0.3);"><th>Outreach</th><th>Submitted</th><th>Responded</th><th>Rate</th></tr>
+  {% for r in response_by_outreach %}
+  <tr style="border-bottom: 1px solid rgba(127,127,127,0.15);"><td>{{ r.group }}</td><td>{{ r.submitted }}</td><td>{{ r.responded }}</td><td>{{ r.rate }}%</td></tr>
+  {% else %}<tr><td colspan="4"><em>No submitted applications yet.</em></td></tr>{% endfor %}
+</table>
+
+<h2>Queue</h2>
+<ul>
+  <li>Ready to submit: <a href="/ready-to-submit">{{ queue.ready_to_submit }}</a></li>
+  <li>Awaiting outreach approval: <a href="/outreach">{{ queue.awaiting_outreach_approval }}</a></li>
+  <li>Needs human: <a href="/applications">{{ queue.needs_human }}</a></li>
+  <li>Follow-ups due today: {{ queue.follow_ups_due }}</li>
+</ul>
+{% endblock %}

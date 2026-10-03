@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Tailoring issues{% endblock %}
+{% block content %}
+<h1>Tailoring issues</h1>
+<p>Jobs where the Rewriter + truth validator loop rejected the tailored resume twice in a row — the engine
+   won't guess or fabricate its way past that, so these need a person to look at the violations and decide
+   what to do (edit the resume, waive the job, or fix the underlying data).</p>
+
+{% if not needs_human %}
+<p><em>Nothing needs attention right now.</em></p>
+{% endif %}
+{% for item in needs_human %}
+<div class="queue-item">
+  <h3>{{ item.company }} — {{ item.title }} <span class="badge needs-human">needs human</span></h3>
+  <div class="meta">
+    Location: {{ item.location or 'not listed' }} | Fit score: {{ item.fit_score }}
+    {% if item.url %} | <a href="{{ item.url }}" target="_blank" rel="noopener">Original posting ↗</a>{% endif %}
+  </div>
+  <a href="/tailoring-issues/{{ item.id }}">View violations →</a>
+</div>
+{% endfor %}
+{% endblock %}

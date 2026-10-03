@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Tailoring issue — {{ item.company }} {{ item.title }}{% endblock %}
+{% block content %}
+<h1>{{ item.company }} — {{ item.title }}</h1>
+<p class="meta">
+  Fit score: {{ item.fit_score }} | Location: {{ item.location or 'not listed' }}
+  {% if item.url %} | <a href="{{ item.url }}" target="_blank" rel="noopener">Original posting ↗</a>{% endif %}
+</p>
+
+<h2>Why this needs a human</h2>
+<p>The Rewriter + truth validator loop was rejected twice. Violations from each attempt:</p>
+{% for attempt in validator_log %}
+<h3>Attempt {{ loop.index }} — {{ 'valid' if attempt.valid else 'rejected' }}</h3>
+<ul>
+  {% for v in attempt.violations %}
+  <li><strong>[{{ v.violation_type }}]</strong> {{ v.org }} / {{ v.title }}<br>
+      <em>{{ v.rewritten_text }}</em><br>
+      {{ v.explanation }}</li>
+  {% endfor %}
+</ul>
+{% endfor %}
+
+<p><a href="/tailoring-issues">← Back to tailoring issues</a></p>
+{% endblock %}

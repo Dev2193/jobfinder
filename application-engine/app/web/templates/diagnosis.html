@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Diagnosis{% endblock %}
+{% block content %}
+<h1>Resume diagnosis <span class="badge {{ 'cleared' if status == 'CLEARED' else 'blocking' }}">{{ status }}</span></h1>
+
+{% if not diagnosis_id %}
+  <p>No diagnosis yet. Upload/confirm a resume on the <a href="/">Intake</a> page first.</p>
+{% else %}
+  <p>Every ATS-killer below must be resolved or explicitly waived before Stage 4 (resume tailoring) can run.</p>
+
+  <h2>ATS-killers <small>(blocking)</small></h2>
+  {% for item in ats_killers %}
+  <form method="post" action="/diagnosis/item/{{ item.id }}" class="checklist-item">
+    <span>{{ item.text }}</span>
+    <label><input type="checkbox" name="resolved" onchange="this.form.submit()" {% if item.resolved %}checked{% endif %}> Resolved</label>
+    <label><input type="checkbox" name="waived" onchange="this.form.submit()" {% if item.waived %}checked{% endif %}> Waive</label>
+  </form>
+  {% else %}
+  <p>None found.</p>
+  {% endfor %}
+
+  <h2>Section-by-section diagnosis</h2>
+  <ul>{% for item in section_diagnosis %}<li>{{ item.text }}</li>{% endfor %}</ul>
+
+  <h2>Missing signals</h2>
+  <ul>{% for item in missing_signals %}<li>{{ item.text }}</li>{% endfor %}</ul>
+
+  <h2>Top fixes ranked by impact</h2>
+  <ul>{% for item in top_fixes %}<li>{{ item.text }}</li>{% endfor %}</ul>
+
+  <form method="post" action="/diagnosis/{{ diagnosis_id }}/clear">
+    <button type="submit">Attempt to clear gate</button>
+  </form>
+{% endif %}
+{% endblock %}

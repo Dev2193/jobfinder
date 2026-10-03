@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Application — {{ item.company }} {{ item.title }}{% endblock %}
+{% block content %}
+<h1>{{ item.company }} — {{ item.title }}</h1>
+<p class="meta">
+  Status: <span class="badge {{ 'needs-human' if item.status == 'NEEDS_HUMAN' else ('blocking' if item.status == 'DISCARDED' else 'cleared') }}">{{ item.status }}</span>
+  | Location: {{ item.location or 'not listed' }}
+  {% if item.url %} | <a href="{{ item.url }}" target="_blank" rel="noopener">Original posting ↗</a>{% endif %}
+  {% if item.application_ref %} | Reference: {{ item.application_ref }}{% endif %}
+</p>
+
+{% if item.blocked_reason %}
+<h2>Why this needs a human</h2>
+<p>{{ item.blocked_reason }}</p>
+{% endif %}
+
+{% if item.screenshot_path %}
+<h2>{{ 'Confirmation screenshot' if item.status == 'SUBMITTED' else 'Filled application (not submitted)' }}</h2>
+<img src="/applications/{{ item.job_id }}/screenshot" style="max-width: 100%; border: 1px solid rgba(127,127,127,0.3); border-radius: 8px;">
+{% endif %}
+
+{% if item.filled_fields_list %}
+<h2>Fields filled</h2>
+<ul>{% for f in item.filled_fields_list %}<li>{{ f }}</li>{% endfor %}</ul>
+{% endif %}
+
+{% if item.unmapped_fields_list %}
+<h2>Fields needing your input</h2>
+<ul>{% for f in item.unmapped_fields_list %}<li class="needs-metric-tag">{{ f }}</li>{% endfor %}</ul>
+<p>Complete these yourself on the <a href="{{ item.url }}" target="_blank" rel="noopener">original posting</a>,
+   or answer them and re-run prep.</p>
+{% endif %}
+
+{% if item.status == 'PREPPED' %}
+<div class="queue-item">
+  <p>This application is filled and waiting for a decision.</p>
+  <div class="action-row">
+    <form method="post" action="/ready-to-submit/{{ item.job_id }}/submit"
+          onsubmit="return confirm('Submit this real application to {{ item.company }}? This cannot be undone.');">
+      <button type="submit" class="btn-approve">Submit</button>
+    </form>
+    <form method="post" action="/ready-to-submit/{{ item.job_id }}/discard">
+      <button type="submit" class="btn-reject">Discard</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% if item.status in ['SUBMITTED', 'REPLIED', 'INTERVIEW', 'OFFER', 'REJECTED_BY_COMPANY'] %}
+<h2>Outcome tracking</h2>
+<p class="meta">No inbox integration exists, so this is tracked manually — mark what actually happened
+   so the dashboard's funnel and response-rate numbers stay accurate.</p>
+<form method="post" action="/applications/{{ item.job_id }}/outcome" class="action-row">
+  <button type="submit" name="outcome" value="REPLIED" class="btn-neutral">Mark: Replied</button>
+  <button type="submit" name="outcome" value="INTERVIEW" class="btn-neutral">Mark: Interview</button>
+  <button type="submit" name="outcome" value="OFFER" class="btn-approve">Mark: Offer</button>
+  <button type="submit" name="outcome" value="REJECTED_BY_COMPANY" class="btn-reject">Mark: Rejected</button>
+</form>
+{% if item.status == 'INTERVIEW' %}
+<p><em>Run <code>engine interview {{ item.job_id }}</code> to prep, or open the transcript in
+   <code>data/output/</code> if one already exists.</em></p>
+{% endif %}
+{% endif %}
+{% endblock %}

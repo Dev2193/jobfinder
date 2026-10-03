@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Run results{% endblock %}
+{% block content %}
+{% if not summary.readiness.can_start %}
+<h1>Run blocked</h1>
+<p class="badge blocking">Readiness result: {{ summary.readiness.status | title }}</p>
+<p>No discovery, browser automation, recruiter call, or provider request was started.</p>
+<h2>Checks requiring attention</h2>
+<ul>
+  {% for check in summary.readiness.checks if check.status != 'pass' %}
+  <li><strong>{{ check.name | title }}:</strong> {{ check.detail }}</li>
+  {% endfor %}
+</ul>
+<p class="meta">Remediation:</p>
+<ul>
+  {% for step in summary.readiness.remediation %}<li>{{ step }}</li>{% endfor %}
+</ul>
+<p class="meta">{{ summary.readiness.billing_console_unknown }}</p>
+{% else %}
+<h1>Run complete</h1>
+
+<h2>Discovery &amp; scoring</h2>
+<ul>
+  <li>Companies polled: {{ summary.discover.companies_polled }}, postings seen: {{ summary.discover.postings_seen }},
+      new jobs inserted: {{ summary.discover.jobs_inserted }}</li>
+  <li>Scored: {{ summary.score.scored }} (auto-skipped: {{ summary.score.auto_skipped }}, below weekly cap: {{ summary.score.below_cap }})</li>
+  {% if summary.families %}
+  <li>Role families: {{ summary.families.total_jobs }} jobs → {{ summary.families.total_families }} families</li>
+  <li>Recruiter ran for {{ summary.recruiter.ran | length }} families</li>
+  {% endif %}
+</ul>
+{% if summary.discover.errors %}
+<p class="meta">Discovery errors: {{ summary.discover.errors | join('; ') }}</p>
+{% endif %}
+{% if summary.recruiter_error %}
+<p class="badge blocking">Recruiter step failed (doesn't affect the filled applications below — it only
+  feeds outreach drafting, not the fill step): {{ summary.recruiter_error }}</p>
+{% endif %}
+
+{% if summary.skipped_overlap %}
+<p class="meta">Skipped {{ summary.skipped_overlap | length }} job(s) at companies already tracked elsewhere
+  (e.g. your other job dashboard): {{ summary.skipped_overlap | map(attribute='company') | unique | join(', ') }}</p>
+{% endif %}
+{% if summary.skipped_below_threshold %}
+<p class="meta">Skipped {{ summary.skipped_below_threshold | length }} job(s) below the fit-score/role-match bar
+  (guardrail: score 75+ or a listed target-role match).</p>
+{% endif %}
+{% if summary.skipped_company_cap %}
+<p class="meta">Skipped {{ summary.skipped_company_cap | length }} job(s) — already at the 2-per-company cap for:
+  {{ summary.skipped_company_cap | map(attribute='company') | unique | join(', ') }}</p>
+{% endif %}
+{% if summary.skipped_category_cap %}
+<p class="meta">Skipped {{ summary.skipped_category_cap | length }} job(s) — already applied in that role category
+  ({{ summary.skipped_category_cap | map(attribute='category') | unique | join(', ') }})</p>
+{% endif %}
+
+<h2>Progress report — filled this run ({{ summary.prepped | length }})</h2>
+<p class="meta">Nothing here has been submitted. Review each one, then Submit or Discard.</p>
+{% if not summary.prepped %}<p><em>Nothing new got filled this run.</em></p>{% endif %}
+{% for e in summary.prepped %}
+<div class="queue-item">
+  <h3>{{ e.company }} — {{ e.title }}</h3>
+  <div class="meta">Location: {{ e.location or 'not listed' }}</div>
+  <div class="action-row">
+    <form method="post" action="/ready-to-submit/{{ e.job_id }}/submit"
+          onsubmit="return confirm('Submit this real application to {{ e.company }}? This cannot be undone.');">
+      <button type="submit" class="btn-approve">Submit</button>
+    </form>
+    <form method="post" action="/ready-to-submit/{{ e.job_id }}/discard">
+      <button type="submit" class="btn-reject">Discard</button>
+    </form>
+    <a href="/applications/{{ e.job_id }}">View filled application →</a>
+  </div>
+</div>
+{% endfor %}
+
+{% if summary.needs_human %}
+<p class="meta">{{ summary.needs_human | length }} job(s) this run need a person to look at them —
+  see <a href="/applications">Applications</a>.</p>
+{% endif %}
+{% endif %}
+{% endblock %}

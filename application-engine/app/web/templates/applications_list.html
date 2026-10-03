@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Applications{% endblock %}
+{% block content %}
+<h1>Applications</h1>
+<p>The submission log — every company applied to, for what role, and where. PREPPED items are filled but not
+   yet decided; act on them from the <a href="/ready-to-submit">progress report</a>.</p>
+
+{% if not applications %}
+<p><em>Nothing here yet.</em></p>
+{% endif %}
+{% for app in applications %}
+<div class="queue-item">
+  <h3>{{ app.company }} — {{ app.title }}</h3>
+  <div class="meta">
+    Status: <span class="badge {{ 'needs-human' if app.status == 'NEEDS_HUMAN' else ('blocking' if app.status == 'DISCARDED' else 'cleared') }}">{{ app.status }}</span>
+    | Location: {{ app.location or 'not listed' }}
+    {% if app.application_ref %} | Ref: {{ app.application_ref }}{% endif %}
+    {% if app.submitted_at %} | Submitted: {{ app.submitted_at }}{% endif %}
+  </div>
+  <a href="/applications/{{ app.job_id }}">Review →</a>
+</div>
+{% endfor %}
+{% endblock %}

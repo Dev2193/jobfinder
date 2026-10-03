@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Review outreach — {{ item.company }}{% endblock %}
+{% block content %}
+<h1>{{ item.company }} — {{ item.title }} <span class="badge cleared">{{ item.kind }}</span></h1>
+<p class="meta">Status: <span class="badge {{ 'needs-human' if item.status == 'NEEDS_HUMAN' else 'cleared' }}">{{ item.status }}</span></p>
+
+{% if error %}
+<p class="badge blocking">Send failed: {{ error }}</p>
+{% endif %}
+
+<h2>Contact</h2>
+<p class="meta">
+  Name: {{ item.contact_name or '(not found)' }}<br>
+  Role: {{ item.contact_role or '—' }}<br>
+  Email: {{ item.contact_email or '(not resolved)' }}
+  {% if item.email_confidence is not none %} — confidence {{ "%.0f"|format(item.email_confidence * 100) }}%{% endif %}<br>
+  {% if item.contact_source_url %}Source: <a href="{{ item.contact_source_url }}" target="_blank" rel="noopener">{{ item.contact_source_url }}</a><br>{% endif %}
+  {% if item.linkedin_url %}LinkedIn search: <a href="{{ item.linkedin_url }}" target="_blank" rel="noopener">open →</a>{% endif %}
+</p>
+
+<h2>Alumni connection</h2>
+{% if item.is_alumni %}
+<p class="meta">
+  <span class="badge cleared">{{ item.alumni_school }} alum found</span>
+  {% if item.alumni_name_hint %}<br>Possible match: {{ item.alumni_name_hint }}
+    {% if item.alumni_source == 'company_site_bio' %}(spotted in the company's own team page — verify before referencing them by name){% endif %}
+  {% endif %}
+</p>
+{% else %}
+<p class="meta">No confirmed alum yet.
+  {% if item.alumni_search_url %}<a href="{{ item.alumni_search_url }}" target="_blank" rel="noopener">Check LinkedIn for {{ item.alumni_school }} alumni at {{ item.company }} →</a>{% endif %}
+</p>
+{% if item.contact_id %}
+<form method="post" action="/outreach/{{ item.id }}/confirm-alumni" class="row">
+  <input type="hidden" name="contact_id" value="{{ item.contact_id }}">
+  <input type="text" name="name" placeholder="Name you found (optional)">
+  <button type="submit" class="btn-neutral">Mark confirmed alum</button>
+</form>
+{% endif %}
+{% endif %}
+
+{% if item.status in ('DRAFT', 'NEEDS_HUMAN') %}
+<form method="post" action="/outreach/{{ item.id }}/edit">
+  <label for="subject">Subject</label>
+  <input type="text" id="subject" name="subject" value="{{ item.subject }}">
+  <label for="body">Body</label>
+  <textarea id="body" name="body" rows="16">{{ item.body }}</textarea>
+
+  <div class="action-row">
+    <button type="submit" class="btn-neutral">Save edits and approve</button>
+  </div>
+</form>
+
+<div class="action-row">
+  <form method="post" action="/outreach/{{ item.id }}/approve">
+    <button type="submit" class="btn-approve">Approve as-is</button>
+  </form>
+  <form method="post" action="/outreach/{{ item.id }}/reject">
+    <input type="text" name="reason" placeholder="Reason (optional)">
+    <button type="submit" class="btn-reject">Reject</button>
+  </form>
+</div>
+{% elif item.status == 'APPROVED' %}
+<h2>Subject</h2>
+<p>{{ item.subject }}</p>
+<h2>Body</h2>
+<p style="white-space: pre-wrap;">{{ item.body }}</p>
+
+<div class="action-row">
+  <form method="post" action="/outreach/{{ item.id }}/send" onsubmit="return confirm('Send this email to {{ item.contact_email or "the resolved contact" }} now? This cannot be undone.');">
+    <button type="submit" class="btn-approve">Send email</button>
+  </form>
+</div>
+{% elif item.status == 'SENT' %}
+<p class="badge cleared">Sent {{ item.sent_at }}</p>
+<h2>Subject</h2>
+<p>{{ item.subject }}</p>
+<h2>Body</h2>
+<p style="white-space: pre-wrap;">{{ item.body }}</p>
+{% endif %}
+{% endblock %}

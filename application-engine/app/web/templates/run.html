@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Run{% endblock %}
+{% block content %}
+<h1>Run the pipeline</h1>
+<p>Discovers new postings, scores them against your resume, and fills out the real application form for each
+   match. <strong>Nothing gets submitted here</strong> — every filled application lands in the
+   <a href="/ready-to-submit">progress report</a> where you Submit or Discard it individually. Your original
+   resume file is attached exactly as you uploaded it; nothing rewrites or reformats it.</p>
+
+<p class="meta">{{ scored_waiting }} job(s) currently waiting to be filled.</p>
+
+<h2>Startup readiness: {{ readiness.status | title }}</h2>
+{% if readiness.can_start %}
+<p class="badge cleared">No-charge local checks passed. The pipeline can start.</p>
+{% else %}
+<p class="badge blocking">The pipeline is held until the checks below are resolved.</p>
+<ul>
+  {% for check in readiness.checks if check.status != 'pass' %}
+  <li><strong>{{ check.name | title }}:</strong> {{ check.detail }}</li>
+  {% endfor %}
+</ul>
+<p class="meta">Remediation:</p>
+<ul>
+  {% for step in readiness.remediation %}<li>{{ step }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+<form method="post" action="/run">
+  <label for="limit">Limit this run to (blank = no limit)</label>
+  <input type="number" id="limit" name="limit" min="1" placeholder="e.g. 50">
+  <label><input type="checkbox" name="exclude_shippy" checked> Skip companies already tracked in the Shippy dashboard</label>
+  <button type="submit" class="btn-approve">Run pipeline now</button>
+</form>
+<p class="meta">This can take a while (a real browser fills out each form) — the page will show a progress
+   report of which companies and roles got filled once it finishes.</p>
+{% endblock %}

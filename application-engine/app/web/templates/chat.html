@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Site assistant{% endblock %}
+{% block content %}
+<h1>Site assistant</h1>
+<p class="meta">Ask for changes to this site in plain language. It reads the real code, drafts a change, and shows
+   you a diff — nothing is written to disk until you click Apply on that specific change. Python (.py) changes
+   need the server restarted to take effect (run it with <code>--reload</code> and that happens automatically);
+   template and static changes apply on the next page load. Off-limits by design: your resume, application
+   database, and API keys — the assistant can't read or write any of it.</p>
+
+<div id="chat-history">
+{% for m in history %}
+  {% if m.role == 'user' %}
+  <div class="queue-item" style="background: rgba(127,127,127,0.06);">
+    <div class="meta">You</div>
+    <p style="white-space: pre-wrap; margin: 0;">{{ m.content }}</p>
+  </div>
+  {% else %}
+  <div class="queue-item">
+    <div class="meta">Site assistant</div>
+    <p style="white-space: pre-wrap; margin: 0;">{{ m.content }}</p>
+
+    {% for edit in m.edits %}
+    <div class="queue-item" style="margin-top: 1rem;">
+      <h3>{{ edit.file_path }}
+        {% if edit.status == 'APPLIED' %}<span class="badge cleared">applied</span>
+        {% elif edit.status == 'DISCARDED' %}<span class="badge blocking">discarded</span>
+        {% else %}<span class="badge needs-human">pending review</span>{% endif %}
+      </h3>
+      <pre style="max-height: 400px; overflow-y: auto;">{{ edit.diff }}</pre>
+      {% if edit.status == 'PENDING' %}
+      <div class="action-row">
+        <form method="post" action="/chat/apply/{{ edit.id }}">
+          <button type="submit" class="btn-approve">Apply</button>
+        </form>
+        <form method="post" action="/chat/discard/{{ edit.id }}">
+          <button type="submit" class="btn-reject">Discard</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% else %}
+  <p><em>No messages yet — ask for a change below.</em></p>
+{% endfor %}
+</div>
+
+<form method="post" action="/chat/message">
+  <label for="message">Message</label>
+  <textarea id="message" name="message" rows="3" placeholder="e.g. Add a filter for remote-only roles on the intake page" required></textarea>
+  <button type="submit" class="btn-approve">Send</button>
+</form>
+
+<script>
+  document.getElementById("chat-history").scrollIntoView(false);
+</script>
+{% endblock %}

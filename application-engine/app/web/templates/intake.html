@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Intake{% endblock %}
+{% block content %}
+<h1>Intake</h1>
+<p>Search filters persist to <code>config.yaml</code> — set once, re-run any stage anytime.</p>
+
+<form method="post" action="/intake" enctype="multipart/form-data">
+  <fieldset>
+    <legend>Role</legend>
+    <label for="target_role">Target role(s) (comma-separated — e.g. "AI/ML Research Intern, Strategy Intern")</label>
+    <input type="text" id="target_role" name="target_role" value="{{ cfg.target_role | join(', ') }}">
+    <label for="industry">Industry / industries (comma-separated)</label>
+    <input type="text" id="industry" name="industry" value="{{ cfg.industry | join(', ') }}">
+    <label for="keywords">Keywords (comma-separated, synonym-expanded)</label>
+    <input type="text" id="keywords" name="keywords" value="{{ cfg.keywords | join(', ') }}">
+  </fieldset>
+
+  <fieldset>
+    <legend>Location</legend>
+    <label for="cities">Cities (comma-separated)</label>
+    <input type="text" id="cities" name="cities" value="{{ cfg.location.cities | join(', ') }}">
+    <label for="countries">Countries (comma-separated)</label>
+    <input type="text" id="countries" name="countries" value="{{ cfg.location.countries | join(', ') }}">
+    <div class="row">
+      <label><input type="checkbox" name="remote" {% if cfg.location.remote %}checked{% endif %}> Remote</label>
+      <label><input type="checkbox" name="hybrid" {% if cfg.location.hybrid %}checked{% endif %}> Hybrid</label>
+    </div>
+    <label for="radius_miles">Radius (miles, optional)</label>
+    <input type="number" id="radius_miles" name="radius_miles" value="{{ cfg.location.radius_miles or '' }}">
+    <label for="excluded_countries">Excluded countries (comma-separated)</label>
+    <input type="text" id="excluded_countries" name="excluded_countries" value="{{ cfg.location.excluded_countries | join(', ') }}">
+    <p><small>A posting clearly located in one of these countries is auto-skipped entirely, even if it's remote — this is
+      the hard stop that keeps a "Remote" US role from slipping back in through the Remote checkbox above.</small></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Employment type</legend>
+    {% for opt in ["full-time", "part-time", "internship", "contract", "apprenticeship"] %}
+    <label><input type="checkbox" name="employment_type" value="{{ opt }}" {% if opt in cfg.employment_type %}checked{% endif %}> {{ opt }}</label>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset>
+    <legend>Seniority</legend>
+    {% for opt in ["intern", "entry", "mid", "senior"] %}
+    <label><input type="checkbox" name="seniority" value="{{ opt }}" {% if opt in cfg.seniority %}checked{% endif %}> {{ opt }}</label>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset>
+    <legend>Undergrad-appropriate filtering</legend>
+    <label for="max_years_experience">Max years of experience required (blank = no limit)</label>
+    <input type="number" id="max_years_experience" name="max_years_experience" min="0" value="{{ cfg.max_years_experience if cfg.max_years_experience is not none else '' }}">
+    <p><small>Postings requiring more years than this are auto-skipped entirely, not just ranked lower.</small></p>
+    <label><input type="checkbox" name="allow_advanced_degree_required" {% if cfg.allow_advanced_degree_required %}checked{% endif %}>
+      Allow postings that require a PhD or Master's degree</label>
+    <p><small>Off by default — a hard "PhD required" or "Master's required" posting is auto-skipped since an undergrad can't truthfully apply.</small></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Salary</legend>
+    <label for="salary_min">Minimum salary</label>
+    <input type="number" id="salary_min" name="salary_min" value="{{ cfg.salary.min or '' }}">
+    <label for="currency">Currency</label>
+    <input type="text" id="currency" name="currency" value="{{ cfg.salary.currency }}">
+    <label><input type="checkbox" name="include_unlisted" {% if cfg.salary.include_unlisted %}checked{% endif %}>
+      Include postings with no listed salary (most postings hide salary — excluding them kills ~70% of the funnel)</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Freshness &amp; caps</legend>
+    <label for="posted_within">Posted within</label>
+    <select id="posted_within" name="posted_within">
+      {% for opt in ["24h", "3d", "7d", "14d", "30d"] %}
+      <option value="{{ opt }}" {% if cfg.posted_within == opt %}selected{% endif %}>{{ opt }}</option>
+      {% endfor %}
+    </select>
+    <label for="weekly_application_cap">Weekly application cap</label>
+    <input type="number" id="weekly_application_cap" name="weekly_application_cap" value="{{ cfg.weekly_application_cap }}">
+    <label for="exclusion_list">Exclusion list (companies, comma-separated)</label>
+    <input type="text" id="exclusion_list" name="exclusion_list" value="{{ cfg.exclusion_list | join(', ') }}">
+  </fieldset>
+
+  <fieldset>
+    <legend>Resume</legend>
+    <label for="resume_file">Upload resume (PDF or DOCX)</label>
+    <input type="file" id="resume_file" name="resume_file" accept=".pdf,.docx">
+    <p><small>Leave blank to save filters only without re-parsing your resume.</small></p>
+  </fieldset>
+
+  <button type="submit">Save &amp; continue</button>
+</form>
+{% endblock %}

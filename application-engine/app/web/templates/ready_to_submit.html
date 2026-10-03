@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Progress report{% endblock %}
+{% block content %}
+<h1>Progress report</h1>
+<p>Every application below has been filled out on the real posting and screenshotted — nothing has been
+   submitted yet. Review each one, then Submit or Discard.</p>
+
+{% if not applications %}
+<p><em>Nothing waiting right now. Run the <a href="/run">pipeline</a> to find and fill more.</em></p>
+{% else %}
+{% for app in applications %}
+<div class="queue-item">
+  <h3>{{ app.company }} — {{ app.title }}</h3>
+  <div class="meta">
+    Location: {{ app.location or 'not listed' }} | Fit score: {{ app.fit_score }}
+  </div>
+  <div class="action-row">
+    <form method="post" action="/ready-to-submit/{{ app.job_id }}/submit"
+          onsubmit="return confirm('Submit this real application to {{ app.company }}? This cannot be undone.');">
+      <button type="submit" class="btn-approve">Submit</button>
+    </form>
+    <form method="post" action="/ready-to-submit/{{ app.job_id }}/discard">
+      <button type="submit" class="btn-reject">Discard</button>
+    </form>
+    <a href="/applications/{{ app.job_id }}">View filled application →</a>
+  </div>
+</div>
+{% endfor %}
+
+<form method="post" action="/ready-to-submit/release"
+      onsubmit="return confirm('Submit all {{ applications | length }} applications above right now? This cannot be undone.');">
+  <button type="submit" class="btn-approve">Submit all {{ applications | length }} applications</button>
+</form>
+{% endif %}
+{% endblock %}

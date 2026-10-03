@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Release results{% endblock %}
+{% block content %}
+<h1>Release complete</h1>
+
+<h2>Submitted ({{ summary.submitted | length }})</h2>
+{% if not summary.submitted %}<p><em>Nothing was submitted.</em></p>{% endif %}
+{% for e in summary.submitted %}
+<div class="queue-item">
+  <h3>{{ e.company }} — {{ e.title }} <span class="badge cleared">submitted</span></h3>
+  <div class="meta">
+    Location: {{ e.location or 'not listed' }}
+    {% if e.application_ref %} | Ref: {{ e.application_ref }}{% endif %}
+  </div>
+  <a href="/applications/{{ e.job_id }}">View →</a>
+</div>
+{% endfor %}
+
+<h2>Needs human ({{ summary.needs_human | length }})</h2>
+{% if not summary.needs_human %}<p><em>None.</em></p>{% endif %}
+{% for e in summary.needs_human %}
+<div class="queue-item">
+  <h3>{{ e.company }} — {{ e.title }} <span class="badge needs-human">needs human</span></h3>
+  <div class="meta">Location: {{ e.location or 'not listed' }} — {{ e.reason }}</div>
+  <a href="/applications/{{ e.job_id }}">View →</a>
+</div>
+{% endfor %}
+
+<p><a href="/applications"><button type="button" class="btn-neutral">View submission log →</button></a></p>
+{% endblock %}

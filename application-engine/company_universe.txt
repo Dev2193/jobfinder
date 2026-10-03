@@ -1,0 +1,27 @@
+# Company universe for discovery (§4). One entry per line: "<ats>:<slug>".
+# Lines starting with # are ignored. Expand this freely as you find more boards
+# (e.g. via a company's own /careers page, which almost always reveals its ATS
+# in the URL: boards.greenhouse.io/<slug> or jobs.lever.co/<slug>).
+#
+# Entries below were spot-checked live on 2026-07-19/21 and are returning real,
+# current postings.
+
+greenhouse:stripe
+greenhouse:airbnb
+greenhouse:robinhood
+greenhouse:coinbase
+greenhouse:asana
+greenhouse:pinterest
+greenhouse:gitlab
+greenhouse:figma
+
+lever:palantir
+lever:plaid
+
+ashby:ramp
+ashby:openai
+ashby:notion
+ashby:linear
+
+smartrecruiters:Visa
+smartrecruiters:Equinox

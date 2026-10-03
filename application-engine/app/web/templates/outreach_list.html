@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Outreach{% endblock %}
+{% block content %}
+<h1>Outreach queue</h1>
+<p>Cover letters and hiring-manager emails, both requiring your explicit approval before anything sends.</p>
+
+<h2>Awaiting approval ({{ pending | length }})</h2>
+{% if not pending %}<p><em>Nothing waiting right now.</em></p>{% endif %}
+{% for item in pending %}
+<div class="queue-item">
+  <h3>{{ item.company }} — {{ item.title }} <span class="badge cleared">{{ item.kind }}</span>
+    {% if item.is_alumni %}<span class="badge cleared">alum found</span>{% endif %}</h3>
+  <div class="meta">
+    Contact: {{ item.contact_name or '(none found — see contact discovery)' }}
+    {% if item.email_confidence is not none %} | Email confidence: {{ "%.0f"|format(item.email_confidence * 100) }}%{% endif %}
+  </div>
+  <a href="/outreach/{{ item.id }}">Review →</a>
+</div>
+{% endfor %}
+
+<h2>Needs human <span class="badge needs-human">{{ needs_human | length }}</span></h2>
+{% if not needs_human %}<p><em>None right now.</em></p>{% endif %}
+{% for item in needs_human %}
+<div class="queue-item">
+  <h3>{{ item.company }} — {{ item.title }} <span class="badge needs-human">{{ item.kind }}</span></h3>
+  <a href="/outreach/{{ item.id }}">Review →</a>
+</div>
+{% endfor %}
+
+<h2>Approved — ready to send ({{ approved | length }})</h2>
+{% if not approved %}<p><em>Nothing waiting to send.</em></p>{% endif %}
+{% for item in approved %}
+<div class="queue-item">
+  <h3>{{ item.company }} — {{ item.title }} <span class="badge cleared">{{ item.kind }}</span></h3>
+  <div class="meta">To: {{ item.contact_email or '(no resolved email)' }}</div>
+  <a href="/outreach/{{ item.id }}">Review &amp; send →</a>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+data/*.db
+data/raw_postings/*
+data/output/*
+!data/raw_postings/.gitkeep
+!data/output/.gitkeep
+.env
+config.yaml

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Standard answers bank{% endblock %}
+{% block content %}
+<h1>Standard answers bank</h1>
+<p>The ~25 questions every portal asks, answered once and reused across every application (§3).</p>
+
+<form method="post" action="/answers-bank">
+  <fieldset>
+    <legend>Experience</legend>
+    <label for="years_experience_overall">Years of experience (overall)</label>
+    <input type="text" id="years_experience_overall" name="years_experience_overall" value="{{ bank.years_experience_overall }}">
+    <label for="years_experience_primary_skill">Years of experience (primary skill)</label>
+    <input type="text" id="years_experience_primary_skill" name="years_experience_primary_skill" value="{{ bank.years_experience_primary_skill }}">
+    <label><input type="checkbox" name="currently_employed" {% if bank.currently_employed %}checked{% endif %}> Currently employed</label>
+    <label for="reason_for_interest_template">Reason-for-interest template</label>
+    <input type="text" id="reason_for_interest_template" name="reason_for_interest_template" value="{{ bank.reason_for_interest_template }}">
+  </fieldset>
+
+  <fieldset>
+    <legend>Authorization &amp; logistics</legend>
+    <label><input type="checkbox" name="work_authorized" {% if bank.work_authorized %}checked{% endif %}> Work authorized</label>
+    <label><input type="checkbox" name="requires_sponsorship" {% if bank.requires_sponsorship %}checked{% endif %}> Requires visa sponsorship</label>
+    <label><input type="checkbox" name="willing_to_relocate" {% if bank.willing_to_relocate %}checked{% endif %}> Willing to relocate</label>
+    <label><input type="checkbox" name="open_to_remote" {% if bank.open_to_remote %}checked{% endif %}> Open to remote</label>
+    <label><input type="checkbox" name="open_to_hybrid" {% if bank.open_to_hybrid %}checked{% endif %}> Open to hybrid</label>
+    <label><input type="checkbox" name="at_least_18" {% if bank.at_least_18 %}checked{% endif %}> At least 18 years old</label>
+    <label><input type="checkbox" name="has_non_compete" {% if bank.has_non_compete %}checked{% endif %}> Has a non-compete agreement</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Compensation &amp; timing</legend>
+    <label for="desired_salary">Desired salary</label>
+    <input type="text" id="desired_salary" name="desired_salary" value="{{ bank.desired_salary }}">
+    <label for="notice_period">Notice period</label>
+    <input type="text" id="notice_period" name="notice_period" value="{{ bank.notice_period }}">
+    <label for="earliest_start_date">Earliest start date</label>
+    <input type="text" id="earliest_start_date" name="earliest_start_date" value="{{ bank.earliest_start_date }}">
+  </fieldset>
+
+  <fieldset>
+    <legend>Referral</legend>
+    <label for="referral_source">Referral source</label>
+    <input type="text" id="referral_source" name="referral_source" value="{{ bank.referral_source }}">
+    <label><input type="checkbox" name="has_referral" {% if bank.has_referral %}checked{% endif %}> Have a referral at this company</label>
+    <label for="referral_name">Referral name</label>
+    <input type="text" id="referral_name" name="referral_name" value="{{ bank.referral_name }}">
+  </fieldset>
+
+  <fieldset>
+    <legend>Background</legend>
+    <label for="highest_education_level">Highest education level</label>
+    <input type="text" id="highest_education_level" name="highest_education_level" value="{{ bank.highest_education_level }}">
+    <label><input type="checkbox" name="willing_background_check" {% if bank.willing_background_check %}checked{% endif %}> Willing to undergo background check</label>
+    <label><input type="checkbox" name="willing_drug_test" {% if bank.willing_drug_test %}checked{% endif %}> Willing to undergo drug test</label>
+    <label><input type="checkbox" name="has_felony_conviction" {% if bank.has_felony_conviction %}checked{% endif %}> Has a felony conviction</label>
+    <label><input type="checkbox" name="previously_employed_here" {% if bank.previously_employed_here %}checked{% endif %}> Previously employed at companies applied to</label>
+    <label><input type="checkbox" name="requires_accommodations" {% if bank.requires_accommodations %}checked{% endif %}> Requires interview accommodations</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Links</legend>
+    <label for="linkedin_url">LinkedIn URL</label>
+    <input type="text" id="linkedin_url" name="linkedin_url" value="{{ bank.linkedin_url }}">
+    <label for="portfolio_url">Portfolio URL</label>
+    <input type="text" id="portfolio_url" name="portfolio_url" value="{{ bank.portfolio_url }}">
+    <label for="github_url">GitHub URL</label>
+    <input type="text" id="github_url" name="github_url" value="{{ bank.github_url }}">
+  </fieldset>
+
+  <fieldset>
+    <legend>Demographics <small>(all default to "prefer not to say")</small></legend>
+    <label for="gender">Gender</label>
+    <input type="text" id="gender" name="gender" value="{{ bank.demographics.gender }}">
+    <label for="race_ethnicity">Race / ethnicity</label>
+    <input type="text" id="race_ethnicity" name="race_ethnicity" value="{{ bank.demographics.race_ethnicity }}">
+    <label for="veteran_status">Veteran status</label>
+    <input type="text" id="veteran_status" name="veteran_status" value="{{ bank.demographics.veteran_status }}">
+    <label for="disability_status">Disability status</label>
+    <input type="text" id="disability_status" name="disability_status" value="{{ bank.demographics.disability_status }}">
+    <label for="lgbtq_identification">LGBTQ+ identification</label>
+    <input type="text" id="lgbtq_identification" name="lgbtq_identification" value="{{ bank.demographics.lgbtq_identification }}">
+    <label for="pronouns">Pronouns</label>
+    <input type="text" id="pronouns" name="pronouns" value="{{ bank.demographics.pronouns }}">
+  </fieldset>
+
+  <button type="submit">Save answers bank</button>
+</form>
+{% endblock %}
