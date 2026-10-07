@@ -19,8 +19,8 @@ EXPORT_PATH = Path(__file__).resolve().parent.parent / "data" / "output" / "ship
 # skip filling out a duplicate application. Best-effort: this file lives
 # outside the project and its exact location can vary by machine, so a
 # missing/unreadable file just means "nothing to cross-check", not an error.
-DASHBOARD_HTML_PATH = Path(
-    "/Users/devchoudary/Library/Application Support/Clicky/projects/agents/shippy/output/job-dashboard.html"
+DASHBOARD_HTML_PATH = (
+    Path.home() / "Library/Application Support/Clicky/projects/agents/shippy/output/job-dashboard.html"
 )
 
 
