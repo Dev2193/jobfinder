@@ -194,7 +194,7 @@ Run as `python -m app.cli <command>` from `application-engine/` (the CLI calls i
 
 ### Local data
 
-Everything personal stays on your machine under `application-engine/data/` and is excluded by `.gitignore`: the SQLite database (`engine.db`), the master resume and Answers Bank JSON, uploaded resume files, raw postings (`data/raw_postings/`), and generated files such as screenshots and tailored resumes (`data/output/`). The `.env` file and `config.yaml` are ignored as well. The diagnoser also writes a Markdown report to `data/diagnosis.md`; note that this file is **not** covered by `.gitignore`, and a copy is currently committed.
+Everything the engine stores about you lives under `application-engine/data/`, and that whole folder is excluded by `.gitignore`: the SQLite database (`engine.db`), the master resume and Answers Bank JSON, uploaded resume files (`data/uploads/`), raw postings (`data/raw_postings/`), generated files such as screenshots, tailored resumes and interview transcripts (`data/output/`), and the diagnoser's Markdown report (`data/diagnosis.md`). The folder is created automatically on first run. The `.env` file and `config.yaml` are ignored as well.
 
 ### Code layout
 

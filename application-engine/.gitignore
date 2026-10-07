@@ -1,10 +1,9 @@
 .venv/
 __pycache__/
 *.pyc
-data/*.db
-data/raw_postings/*
-data/output/*
-!data/raw_postings/.gitkeep
-!data/output/.gitkeep
+# Everything under data/ is personal or generated at runtime (SQLite DB,
+# master resume + answers bank JSON, uploaded resumes, raw postings,
+# screenshots/tailored output, diagnosis report). The app recreates it.
+data/
 .env
 config.yaml
